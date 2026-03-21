@@ -1,0 +1,94 @@
+<!-- 4. **Weather App with API Integration**
+    - **Objective:** Create a weather app that fetches and displays weather information based on a city name input.
+    - **Requirements:**
+        - Use the Fetch API to retrieve weather data from a public API (e.g., OpenWeatherMap).
+        - Parse the JSON response and update the DOM with temperature, humidity, and weather conditions.
+        - Implement error handling for invalid input or failed network requests. -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather App</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        input {
+            padding: 10px;
+            width: 200px;
+        }
+
+        button {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #weatherInfo {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Weather App</h1>
+
+<input type="text" id="input" placeholder="Enter city name">
+<button onclick="getWeather()">Get Weather</button>
+
+<div id="weatherInfo"></div>
+
+<script>
+function getWeather() {
+
+    const apiKey = 'd9833abc63855856487e6d93bd6db1bc'; // replace
+    const city = document.getElementById('input').value;
+    const weatherInfo = document.getElementById('weatherInfo');
+
+    if(city === "") {
+        weatherInfo.innerHTML = "<p class='error'>Please enter a city name</p>";
+        return;
+    }
+
+    weatherInfo.innerHTML = "Loading";
+
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
+
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("City not found");
+            }
+            return response.json();
+        })
+        .then(data => {
+
+            let temp = (data.main.temp - 273.15).toFixed(2);
+
+            weatherInfo.innerHTML = `
+                <p><b>City:</b> ${data.name}</p>
+                <p><b>Temperature:</b> ${temp}°C</p>
+                <p><b>Humidity:</b> ${data.main.humidity}%</p>
+                <p><b>Condition:</b> ${data.weather[0].description}</p>
+            `;
+        })
+        .catch(error => {
+            weatherInfo.innerHTML = `<p class='error'>${error.message}</p>`;
+        });
+}
+</script>
+
+</body>
+</html>
+
+
+

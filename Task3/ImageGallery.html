@@ -1,0 +1,113 @@
+<!-- 3. **Image Gallery Lightbox**
+    - **Objective:** Develop an image gallery where clicking a thumbnail opens a larger version in a modal/lightbox overlay.
+    - **Requirements:**
+        - Use event listeners to detect when a thumbnail is clicked.
+        - Dynamically update the modal content with the selected image.
+        - Toggle CSS classes to show/hide the modal and add transitions for smooth effects. -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Gallery</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 20px;
+        }
+
+        .gridcontainer {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        img {
+            width: 250px;
+            height: 250px;
+            border-radius: 10px;
+        }
+
+        img:hover {
+            cursor: pointer;
+            transform: scale(1.05);
+            transition: 0.3s;
+        }
+
+        .modal {
+            display: none; /* changed */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .modal img {
+            width: 400px;
+            height: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+        }
+
+        #caption {
+            color: white;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+    <body>
+
+    <h1>Image Gallery</h1>
+
+    <div class="gridcontainer">
+        <img src="img1.png" alt="Dhoni" onclick="showModal(event)">
+        <img src="img2.png" alt="Raina" onclick="showModal(event)">
+        <img src="img3.png" alt="Sanju Samson" onclick="showModal(event)">
+        <img src="img4.png" alt="Jadeja" onclick="showModal(event)">
+        <img src="img5.png" alt="Bravo" onclick="showModal(event)">
+        <img src="img6.jpg" alt="FaF" onclick="showModal(event)">
+        <img src="img7.png" alt="Ashwin" onclick="showModal(event)">
+        <img src="img8.jpg" alt="Imran Tahir" onclick="showModal(event)">
+        <img src="img9.png" alt="Pathirana" onclick="showModal(event)">
+    </div>
+
+    <div class="modal" id="myModal">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <img id="img01">
+        <div id="caption"></div>
+    </div>
+
+    <script>
+
+    function showModal(e) {
+        document.getElementById("myModal").style.display = "flex";
+        document.getElementById("img01").src = e.target.src;
+        document.getElementById("caption").innerText = e.target.alt;
+    }
+
+    function closeModal() {
+        document.getElementById("myModal").style.display = "none";
+    }
+
+    </script>
+
+    </body>
+</html>

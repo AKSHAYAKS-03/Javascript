@@ -1,0 +1,186 @@
+<!-- 5. **Dynamic Quiz Application**
+    - **Objective:** Build a quiz app that dynamically loads questions and tracks user scores.
+    - **Requirements:**
+        - Store quiz questions and options in a JavaScript object or load them from an external JSON file.
+        - Use event listeners to capture user selections and move through quiz questions.
+        - Calculate and display the final score, providing feedback or explanations as needed. -->
+
+        
+<!DOCTYPE html>
+    <html>
+    <head>
+        <title>Quiz App</title>
+        <style>
+            body {
+                font-family: Arial;
+                text-align: center;
+                background: #8b8b8b;
+            }
+
+            .quiz-box {
+                width: 600px;
+                height: 400px;
+                margin: 100px auto;
+                padding: 50px;
+                background: white;
+                border-radius: 10px;
+                box-shadow: 0 0 10px gray;
+            }
+
+            button {
+                width: 100%;
+                margin: 10px 0;
+                background:none;
+                padding: 20px;
+                cursor: pointer;
+                border-radius: 10px;
+                border: none;
+            }
+            button:hover{
+                background: rgb(247, 246, 246);
+            }
+            #options{
+                display: grid;
+                grid-template-columns: auto auto;
+                gap: 20px;
+                border-radius: 10px;
+                padding:50px;
+            }
+
+            .selected {
+                background: lightgreen;
+            }
+
+            .nav-btns {
+                margin-top: 20px;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .nav-btns button {
+                font-weight: bold;
+                width: 30%;
+                cursor: pointer;
+                border-radius: 10px;
+                border: none;
+                background-color: #f3f3f3;
+            }
+        </style>
+    </head>
+    <body>
+
+    <div class="quiz-box">
+        <h2 id="question"></h2>
+        <div id="options"></div>
+
+        <div class="nav-btns">
+            <button onclick="prevQuestion()">Previous</button>
+            <button onclick="nextQuestion()">Next</button>
+        </div>
+
+        <h3 id="score"></h3>
+    </div>
+
+    <script>
+
+    const quizData = [
+        {
+            question: "Which ocean is the largest in the world?",
+            options: ["Pacific Ocean", "Atlantic Ocean", "Indian Ocean", "Arctic Ocean"],
+            answer: "Pacific Ocean"
+        },
+        {
+            question: "Which river is known as the longest river in the world?",
+            options: ["Nile", "Amazon", "Yangtze", "Mississippi"],
+            answer: "Nile"
+        },
+        {
+            question: " What is the largest mammal on Earth?",
+            options: ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"],
+            answer: "Blue Whale"
+        },
+        {
+            question: "Who is the inventor of the telephone?",
+            options: ["Thomas Edison", "Alexander Graham Bell", "Nikola Tesla", "Marie Curie"],
+            answer: "Alexander Graham Bell"
+        },
+        {
+            question:"What is the smallest country in the world?",
+            options: ["Vatican City", "Maldives", "Monaco", "San Marino"],
+            answer: "Vatican City"
+        },
+        {
+            question:"Which country is known as the Land of Rising Sun?",
+            options: ["Japan", "Korea", "China", "India"],
+            answer: "Japan"
+        }
+
+    ];
+
+    let currentIndex = 0;
+    let userAnswers = [];
+
+ function loadQuestion() {
+    let q = quizData[currentIndex];
+
+    document.getElementById("question").innerText = q.question;
+
+    let optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = ""; 
+
+    for (let i = 0; i < q.options.length; i++) {
+
+        let btn = document.createElement("button");
+        btn.innerText = q.options[i];
+
+        if (userAnswers[currentIndex] === q.options[i]) {
+            btn.style.background = "lightgreen";
+        }
+
+        btn.onclick = function () {
+            userAnswers[currentIndex] = q.options[i];
+            loadQuestion();
+        };
+
+        optionsDiv.appendChild(btn);
+    }
+}
+
+
+    function nextQuestion() {
+        if (currentIndex < quizData.length - 1) {
+            currentIndex++;
+            loadQuestion();
+        } else {
+            showScore();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            loadQuestion();
+        }
+    }
+
+    function showScore() {
+        let score = 0;
+
+        quizData.forEach((q, index) => {
+            if (userAnswers[index] === q.answer) {
+                score++;
+            }
+        });
+
+        document.querySelector(".quiz-box").innerHTML = `
+            <h2>Quiz Completed</h2>
+            <h3>Your Score: ${score}/${quizData.length}</h3>
+        `;
+    }
+
+    loadQuestion();
+
+    </script>
+
+    </body>
+</html>

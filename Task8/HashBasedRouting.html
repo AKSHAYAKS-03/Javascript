@@ -1,0 +1,107 @@
+<!-- 8. **Single-Page Application (SPA) with Hash-based Routing**
+    - **Objective:** Build a basic SPA that navigates between different views without reloading the page.
+    - **Requirements:**
+        - Implement hash-based routing by listening to the `window.onhashchange` event.
+        - Dynamically load different content sections based on the current URL hash.
+        - Maintain a consistent UI and state across route changes. -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My SPA Website</title>
+
+  <style>
+    body {
+      margin: 0;
+    }
+    nav {
+      background: #333;
+      padding: 15px;
+      text-align: center;
+    }
+
+    nav a {
+      color: white;
+      margin: 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    #content {
+      padding: 40px;
+      text-align: center;
+      font-size: 20px;
+      min-height: 200px;
+    }
+
+    .card {
+      background: #f4f4f4;
+      padding: 20px;
+      margin: 20px auto;
+      width: 60%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px gray;
+    }
+  </style>
+</head>
+
+    <body>
+
+    <nav>
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#services">Services</a>
+    <a href="#contact">Contact</a>
+    </nav>
+
+    <div id="content"></div>
+
+    <script>
+    const content = document.getElementById("content");
+
+    function loadPage() {
+    let hash = window.location.hash;
+
+    if (hash === "#about") {
+        content.innerHTML = `
+        <div class="card">
+            <h2>About Us</h2>
+            <p>This is a simple SPA website built using JavaScript.</p>
+        </div>
+        `;
+    }
+
+    else if (hash === "#services") {
+        content.innerHTML = `
+        <div class="card">
+            <h2>Our Services</h2>
+            <p>Web Development, App Development, UI Design</p>
+        </div>
+        `;
+    }
+
+    else if (hash === "#contact") {
+        content.innerHTML = `
+        <div class="card">
+            <h2>Contact</h2>
+            <p>Email: example@gmail.com</p>
+        </div>
+        `;
+    }
+
+    else {
+        content.innerHTML = `
+        <div class="card">
+            <h2>Welcome</h2>
+            <p>This is Home Page</p>
+        </div>
+        `;
+    }
+    }
+
+    window.onhashchange = loadPage();
+
+    loadPage();
+    </script>
+
+    </body>
+</html>

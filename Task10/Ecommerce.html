@@ -1,0 +1,255 @@
+<!-- 10. **Full-featured eCommerce Shopping Cart**
+    - **Objective:** Build a comprehensive eCommerce simulation that includes product listings, a shopping cart, and dynamic price calculations.
+    - **Requirements:**
+        - **Product Listing:** Dynamically load and display product information (images, prices, descriptions) from a data source.
+        - **Shopping Cart:** Implement add-to-cart functionality, allowing users to adjust quantities and remove items.
+        - **State Management:** Use JavaScript to manage cart state and persist data using techniques like `localStorage`.
+        - **Price Calculations:** Dynamically compute totals, taxes, and discounts based on cart contents.
+        - **Product Filtering/Search:** Add features for filtering products by category or searching by keywords.
+        - **Responsive UI:** Ensure the interface adapts well to various screen sizes and devices.
+        - **Advanced Concepts:** Incorporate modular JavaScript (using ES6 modules), advanced error handling, and efficient DOM manipulation techniques. -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API E-Commerce Cart</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #search {
+            width: 90%;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        .container {
+            display: flex;
+            padding: 20px;
+        }
+
+        #product-list {
+            width: 70%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px,1fr));            
+            gap: 20px;
+        }
+        /* auto-fit - acc to screen size  */
+
+        .product {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .product img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        button {
+            background: green;
+            color: white;
+            padding: 8px;
+            border: none;
+            cursor: pointer;
+        }
+
+        #cart {
+            width: 30%;
+            margin-left: 20px;
+            border-left: 2px solid #ddd;
+            padding-left: 20px;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .cart-item {
+            margin-bottom: 10px;
+        }
+
+        input {
+            width: 50px;
+        }
+
+        @media(max-width: 768px){
+            .container {
+                flex-direction: row;
+            }
+
+            #cart {
+                width: 100%;
+                border-left: none;
+                border-top: 2px solid #ddd;
+            }
+
+            #product-list {
+                width: 65%;
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>API Store</h1>
+
+<input type="text" id="search" placeholder="Search products">
+<select id="category">
+    <option value="all">All</option>
+    <option value="beauty">Beauty</option>
+    <option value="furniture">Furniture</option>
+    <option value="groceries">Groceries</option>
+</select>
+
+<div class="container">
+    <div id="product-list"></div>
+
+    <div id="cart">
+        <h2>Cart</h2>
+        <div id="cart-items"></div>
+        <h3>Total: ₹<span id="total">0</span></h3>
+    </div>
+</div>
+
+<script>
+
+    let products = [];
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    async function loadProducts(){
+        try{
+            const res = await fetch("https://dummyjson.com/products");
+            const data = await res.json();
+
+            products = data.products.map(p => ({
+                id: p.id,
+                name: p.title,
+                price: Math.round(p.price * 80),
+                image: p.thumbnail,
+                category: p.category
+            }));
+
+        filterProducts();
+
+        } catch(err){
+            alert("Error loading products");
+            console.log(err);
+        }
+    }
+
+    function displayProducts(list){
+        const container = document.getElementById("product-list");
+        container.innerHTML = "";
+
+        list.forEach(p=>{
+            container.innerHTML += `
+            <div class="product">
+                <img src="${p.image}" onerror="this.src='https://picsum.photos/200'">
+                <h3>${p.name}</h3>
+                <p>₹${p.price}</p>
+                <button onclick="addToCart(${p.id})">Add to Cart</button>
+            </div>`;
+        });
+    }
+
+    function addToCart(id){
+        const item = cart.find(p=>p.id === id);
+
+        if(item){
+            item.qty++;
+        } else {
+            const product = products.find(p=>p.id === id);
+            cart.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                qty: 1
+            });
+        }
+
+        updateCart();
+    }
+
+    function updateCart(){
+        localStorage.setItem("cart", JSON.stringify(cart));
+
+        const container = document.getElementById("cart-items");
+        container.innerHTML = "";
+
+        let total = 0;
+
+        cart.forEach(item=>{
+            total += item.price * item.qty;
+
+            container.innerHTML += `
+            <div class="cart-item">
+                ${item.name} - ₹${item.qty * item.price}
+                <br>
+                Qty: <input type="number" value="${item.qty}" min="1"
+                onchange="changeQty(${item.id}, this.value)">
+                <button onclick="removeItem(${item.id})">X</button>
+            </div>`;
+        });
+
+        let tax = total * 0.18;
+        let discount = total > 5000 ? 100 : 0;
+
+        let grandTotal = total + tax - discount;
+
+        document.getElementById("cart-items").innerHTML += `
+                <hr>
+                <p>Subtotal: ₹${total.toFixed(2)}</p>
+                <p>GST (18%): ₹${tax.toFixed(2)}</p>
+                <p>Discount: ₹${discount}</p>
+        `;
+
+        document.getElementById("total").innerText = grandTotal.toFixed(2);
+    }
+
+    function changeQty(id, qty){
+        const item = cart.find(p=>p.id === id);
+        item.qty = parseInt(qty);
+        
+        updateCart();
+    }
+
+    function removeItem(id){
+        cart = cart.filter(p=>p.id !== id);
+        updateCart();
+    }
+
+    function filterProducts(){
+        let search = document.getElementById("search").value.toLowerCase();
+        let category = document.getElementById("category").value;
+
+        let filtered = products.filter(p =>
+            p.name.toLowerCase().includes(search) &&
+            (category === "all" || p.category === category)
+        );
+
+        displayProducts(filtered);
+    }
+    //includes("") - true 
+
+    document.getElementById("search").addEventListener("input", filterProducts);
+    document.getElementById("category").addEventListener("change", filterProducts);
+
+    loadProducts();
+    updateCart();
+
+</script>
+
+</body>
+</html>

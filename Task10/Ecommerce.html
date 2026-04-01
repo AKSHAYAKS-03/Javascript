@@ -129,126 +129,146 @@
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
     async function loadProducts(){
-        try{
-            const res = await fetch("https://dummyjson.com/products");
-            const data = await res.json();
+    try{
+        const res = await fetch("https://dummyjson.com/products");
+        const data = await res.json();
 
-            products = data.products.map(p => ({
-                id: p.id,
-                name: p.title,
-                price: Math.round(p.price * 80),
-                image: p.thumbnail,
-                category: p.category
-            }));
+        products = data.products.map(p => ({
+            id: p.id,
+            name: p.title,
+            price: Math.round(p.price * 80),
+            image: p.thumbnail,
+            category: p.category
+        }));
 
-        filterProducts();
+    filterProducts();
 
-        } catch(err){
-            alert("Error loading products");
-            console.log(err);
-        }
+    } catch(err){
+        alert("Error loading products");
+        console.log(err);
+    }
     }
 
     function displayProducts(list){
-        const container = document.getElementById("product-list");
-        container.innerHTML = "";
+    const container = document.getElementById("product-list");
+    container.innerHTML = "";
 
-        list.forEach(p=>{
-            container.innerHTML += `
-            <div class="product">
-                <img src="${p.image}" onerror="this.src='https://picsum.photos/200'">
-                <h3>${p.name}</h3>
-                <p>₹${p.price}</p>
-                <button onclick="addToCart(${p.id})">Add to Cart</button>
-            </div>`;
-        });
+    list.forEach(p=>{
+        container.innerHTML += `
+        <div class="product">
+            <img src="${p.image}" onerror="this.src='https://picsum.photos/200'">
+            <h3>${p.name}</h3>
+            <p>₹${p.price}</p>
+            <button onclick="addToCart(${p.id})">Add to Cart</button>
+        </div>`;
+    });
     }
 
     function addToCart(id){
-        const item = cart.find(p=>p.id === id);
+    const item = cart.find(p => p.id === id);
 
-        if(item){
-            item.qty++;
-        } else {
-            const product = products.find(p=>p.id === id);
-            cart.push({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                qty: 1
-            });
-        }
+    if(item){
+    item.qty++;
+    updateCartItemUI(id);
+    } else {
+    const product = products.find(p=>p.id === id);
+    cart.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        qty: 1
+    });
 
-        updateCart();
+    renderCart();
     }
 
-    function updateCart(){
-        localStorage.setItem("cart", JSON.stringify(cart));
+    saveCart();
+    updateSummary();
+    }
 
-        const container = document.getElementById("cart-items");
-        container.innerHTML = "";
+    function saveCart(){
+    localStorage.setItem("cart", JSON.stringify(cart));
+    }
 
-        let total = 0;
+    function renderCart(){
+    const container = document.getElementById("cart-items");
+    container.innerHTML = "";
 
-        cart.forEach(item=>{
-            total += item.price * item.qty;
+    cart.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "cart-item";
+    div.id = "cart-" + item.id;
 
-            container.innerHTML += `
-            <div class="cart-item">
-                ${item.name} - ₹${item.qty * item.price}
-                <br>
-                Qty: <input type="number" value="${item.qty}" min="1"
-                onchange="changeQty(${item.id}, this.value)">
-                <button onclick="removeItem(${item.id})">X</button>
-            </div>`;
-        });
+    div.innerHTML = `
+        ${item.name} - ₹<span id="price-${item.id}">${item.price * item.qty}</span>
+        <br>
+        Qty: <input type="number" value="${item.qty}" min="1"
+        onchange="changeQty(${item.id}, this.value)">
+        <button onclick="removeItem(${item.id})">X</button>
+    `;
 
-        let tax = total * 0.18;
-        let discount = total > 5000 ? 100 : 0;
+    container.appendChild(div);
+    });
 
-        let grandTotal = total + tax - discount;
-
-        document.getElementById("cart-items").innerHTML += `
-                <hr>
-                <p>Subtotal: ₹${total.toFixed(2)}</p>
-                <p>GST (18%): ₹${tax.toFixed(2)}</p>
-                <p>Discount: ₹${discount}</p>
-        `;
-
-        document.getElementById("total").innerText = grandTotal.toFixed(2);
+    updateSummary();
     }
 
     function changeQty(id, qty){
-        const item = cart.find(p=>p.id === id);
-        item.qty = parseInt(qty);
-        
-        updateCart();
+    const item = cart.find(p=>p.id === id);
+    item.qty = parseInt(qty);
+
+    updateCartItemUI(id);
+    saveCart();
+    updateSummary();
     }
 
     function removeItem(id){
-        cart = cart.filter(p=>p.id !== id);
-        updateCart();
+    cart = cart.filter(p=>p.id !== id);
+
+    document.getElementById("cart-" + id).remove();
+
+    saveCart();
+    updateSummary();
     }
 
     function filterProducts(){
-        let search = document.getElementById("search").value.toLowerCase();
-        let category = document.getElementById("category").value;
+    let search = document.getElementById("search").value.toLowerCase();
+    let category = document.getElementById("category").value;
 
-        let filtered = products.filter(p =>
-            p.name.toLowerCase().includes(search) &&
-            (category === "all" || p.category === category)
-        );
+    let filtered = products.filter(p =>
+        p.name.toLowerCase().includes(search) &&
+        (category === "all" || p.category === category)
+    );
 
-        displayProducts(filtered);
+    displayProducts(filtered);
     }
-    //includes("") - true 
+
+    function updateCartItemUI(id){
+    const item = cart.find(p => p.id === id);
+    if(!item) return;
+
+    document.getElementById(`price-${id}`).innerText = item.price * item.qty;
+    }
+
+    function updateSummary(){
+    let total = 0;
+
+    cart.forEach(item => {
+    total += item.price * item.qty;
+    });
+
+    let tax = total * 0.18;
+    let discount = total > 5000 ? 100 : 0;
+
+    let grandTotal = total + tax - discount;
+
+    document.getElementById("total").innerText = grandTotal.toFixed(2);
+    }
 
     document.getElementById("search").addEventListener("input", filterProducts);
     document.getElementById("category").addEventListener("change", filterProducts);
-
     loadProducts();
-    updateCart();
-
+    renderCart();  
 </script>
 
 </body>
